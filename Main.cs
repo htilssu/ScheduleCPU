@@ -37,7 +37,10 @@ namespace ScheduleCPU
             var arrivalTimeInt = Array.ConvertAll(arrivalTime, int.Parse);
             var burstTime = burstTimeTb.Text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             var burstTimeInt = Array.ConvertAll(burstTime, int.Parse);
-            SolveProblem.Solve(Algo.FCFS, arrivalTimeInt, burstTimeInt);
+          var result =  SolveProblem.Solve(Algo.FCFS, arrivalTimeInt, burstTimeInt);
+          resultTable.DataSource = result.Table.TableItems;
         }
+
+      
     }
 }

@@ -16,14 +16,16 @@ namespace ScheduleCPU
 
     public class SolveProblem
     {
-        public static void Solve(Algo type, int[] arrivalTime, int[] burstTime, int[] priority = null,
+        public static Result Solve(Algo type, int[] arrivalTime, int[] burstTime, int[] priority = null,
             int quantumTime = 0)
         {
             var processes = InitProcesses(arrivalTime, burstTime, priority);
             if (type == Algo.FCFS)
             {
-                FCFS(processes);
+              return  FCFS(processes);
             }
+
+            return null;
         }
 
         private static Process[] InitProcesses(IReadOnlyList<int> arrivalTime, IReadOnlyList<int> burstTime,
@@ -34,6 +36,7 @@ namespace ScheduleCPU
             {
                 processes[i] = new Process()
                 {
+                    ProcessName = "P"+(i+1),
                     ArrivalTime = arrivalTime[i],
                     BurstTime = burstTime[i],
                     Priority = priority?[i]
@@ -43,7 +46,8 @@ namespace ScheduleCPU
             return processes;
         }
 
-        private static void FCFS(Process[] processes)
+        
+        private static Result FCFS(Process[] processes)
         {
             var tableResult = new Table();
             var ganttChart = new GanttChart();
@@ -51,7 +55,7 @@ namespace ScheduleCPU
 
             ganttChart.AddItem(new GanttItem()
             {
-                Start = 0,
+                Start = processesClone[0].ArrivalTime,
                 Exit = processesClone[0].BurstTime,
                 Process = processesClone[0]
             });
@@ -60,7 +64,7 @@ namespace ScheduleCPU
 
             for (var i = 1; i < processesClone.Length; i++)
             {
-                if (currentTime == 0 || currentTime >= processes[i].ArrivalTime)
+                if (currentTime != 0 || currentTime >= processes[i].ArrivalTime)
                 {
                     currentTime = ganttChart.GanttItems[i - 1].Exit + processesClone[i].BurstTime;
                     ganttChart.AddItem(new GanttItem()
@@ -82,6 +86,7 @@ namespace ScheduleCPU
                         Process = processesClone[i]
                     });
                 }
+
             }
 
             foreach (var gantt in ganttChart.GanttItems)
@@ -97,6 +102,8 @@ namespace ScheduleCPU
                     ResponseTime = gantt.Start - gantt.Process.ArrivalTime,
                 });
             }
+            return new Result(ganttChart, tableResult);
+
         }
     }
 }

@@ -35,8 +35,8 @@
             this.solveBtn = new System.Windows.Forms.Button();
             this.arrivalTimeLb = new System.Windows.Forms.Label();
             this.burstTimeLb = new System.Windows.Forms.Label();
-            this.dataGrid1 = new System.Windows.Forms.DataGrid();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).BeginInit();
+            this.resultTable = new System.Windows.Forms.DataGrid();
+            ((System.ComponentModel.ISupportInitialize)(this.resultTable)).BeginInit();
             this.SuspendLayout();
             // 
             // AlgoCoB
@@ -51,15 +51,19 @@
             // arrivalTimeTb
             // 
             this.arrivalTimeTb.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.arrivalTimeTb.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.arrivalTimeTb.Location = new System.Drawing.Point(12, 64);
             this.arrivalTimeTb.Multiline = true;
             this.arrivalTimeTb.Name = "arrivalTimeTb";
             this.arrivalTimeTb.Size = new System.Drawing.Size(316, 37);
             this.arrivalTimeTb.TabIndex = 1;
+            this.arrivalTimeTb.Text = "sdsd";
+            this.arrivalTimeTb.WordWrap = false;
             // 
             // burstTimeTb
             // 
             this.burstTimeTb.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.burstTimeTb.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.burstTimeTb.Location = new System.Drawing.Point(12, 140);
             this.burstTimeTb.Multiline = true;
             this.burstTimeTb.Name = "burstTimeTb";
@@ -92,40 +96,40 @@
             this.burstTimeLb.TabIndex = 4;
             this.burstTimeLb.Text = "BurstTime";
             // 
-            // dataGrid1
+            // resultTable
             // 
-            this.dataGrid1.AlternatingBackColor = System.Drawing.Color.White;
-            this.dataGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGrid1.BackColor = System.Drawing.Color.White;
-            this.dataGrid1.BackgroundColor = System.Drawing.Color.Gainsboro;
-            this.dataGrid1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.dataGrid1.CaptionBackColor = System.Drawing.Color.Silver;
-            this.dataGrid1.CaptionFont = new System.Drawing.Font("Courier New", 10F, System.Drawing.FontStyle.Bold);
-            this.dataGrid1.CaptionForeColor = System.Drawing.Color.Black;
-            this.dataGrid1.DataMember = "";
-            this.dataGrid1.FlatMode = true;
-            this.dataGrid1.Font = new System.Drawing.Font("Courier New", 9F);
-            this.dataGrid1.ForeColor = System.Drawing.Color.DarkSlateGray;
-            this.dataGrid1.GridLineColor = System.Drawing.Color.DarkGray;
-            this.dataGrid1.HeaderBackColor = System.Drawing.Color.DarkGreen;
-            this.dataGrid1.HeaderFont = new System.Drawing.Font("Courier New", 10F, System.Drawing.FontStyle.Bold);
-            this.dataGrid1.HeaderForeColor = System.Drawing.Color.White;
-            this.dataGrid1.LinkColor = System.Drawing.Color.DarkGreen;
-            this.dataGrid1.Location = new System.Drawing.Point(357, 186);
-            this.dataGrid1.Name = "dataGrid1";
-            this.dataGrid1.ParentRowsBackColor = System.Drawing.Color.Gainsboro;
-            this.dataGrid1.ParentRowsForeColor = System.Drawing.Color.Black;
-            this.dataGrid1.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            this.dataGrid1.SelectionForeColor = System.Drawing.Color.Black;
-            this.dataGrid1.Size = new System.Drawing.Size(707, 556);
-            this.dataGrid1.TabIndex = 5;
+            this.resultTable.AlternatingBackColor = System.Drawing.Color.White;
+            this.resultTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.resultTable.BackColor = System.Drawing.Color.White;
+            this.resultTable.BackgroundColor = System.Drawing.Color.Gainsboro;
+            this.resultTable.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.resultTable.CaptionBackColor = System.Drawing.Color.Silver;
+            this.resultTable.CaptionFont = new System.Drawing.Font("Courier New", 10F, System.Drawing.FontStyle.Bold);
+            this.resultTable.CaptionForeColor = System.Drawing.Color.Black;
+            this.resultTable.DataMember = "";
+            this.resultTable.FlatMode = true;
+            this.resultTable.Font = new System.Drawing.Font("Courier New", 9F);
+            this.resultTable.ForeColor = System.Drawing.Color.DarkSlateGray;
+            this.resultTable.GridLineColor = System.Drawing.Color.DarkGray;
+            this.resultTable.HeaderBackColor = System.Drawing.Color.DarkGreen;
+            this.resultTable.HeaderFont = new System.Drawing.Font("Courier New", 10F, System.Drawing.FontStyle.Bold);
+            this.resultTable.HeaderForeColor = System.Drawing.Color.White;
+            this.resultTable.LinkColor = System.Drawing.Color.DarkGreen;
+            this.resultTable.Location = new System.Drawing.Point(357, 12);
+            this.resultTable.Name = "resultTable";
+            this.resultTable.ParentRowsBackColor = System.Drawing.Color.Gainsboro;
+            this.resultTable.ParentRowsForeColor = System.Drawing.Color.Black;
+            this.resultTable.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            this.resultTable.SelectionForeColor = System.Drawing.Color.Black;
+            this.resultTable.Size = new System.Drawing.Size(707, 730);
+            this.resultTable.TabIndex = 5;
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1076, 754);
-            this.Controls.Add(this.dataGrid1);
+            this.Controls.Add(this.resultTable);
             this.Controls.Add(this.burstTimeLb);
             this.Controls.Add(this.arrivalTimeLb);
             this.Controls.Add(this.solveBtn);
@@ -135,12 +139,12 @@
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Main";
-            ((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.resultTable)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
 
-        private System.Windows.Forms.DataGrid dataGrid1;
+        private System.Windows.Forms.DataGrid resultTable;
 
         private System.Windows.Forms.Label arrivalTimeLb;
         private System.Windows.Forms.Label burstTimeLb;
