@@ -4,7 +4,7 @@ namespace ScheduleCPU
 {
     public  class TableItem
     {
-        public string Process { get; set; }
+        public string ProcessName { get; set; }
         public int ArrivalTime { get; set; }
         public int BurstTime { get; set; }
         public int ExitTime { get; set; }

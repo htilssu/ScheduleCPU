@@ -44,6 +44,7 @@ namespace ScheduleCPU
 
         private static void FCFS(Process[] processes)
         {
+            var tableResult = new Table();
             var ganttChart = new GanttChart();
             var processesClone = processes.OrderByDescending(process => process.ArrivalTime).ToArray();
 
@@ -77,6 +78,18 @@ namespace ScheduleCPU
                         Process = processesClone[i]
                     });
                 }
+            }
+            
+            for (var i = 0; i < ganttChart.GanttItems.Count; i++)
+            {
+                var gantt = ganttChart.GanttItems[i];
+                tableResult.AddItem(new TableItem()
+                {
+                    ProcessName = gantt.Process.ProcessName,
+                    ArrivalTime = gantt.Process.ArrivalTime,
+                    BurstTime = gantt.Process.BurstTime,
+                    Priority = gantt.Process.Priority
+                });
             }
         }
     }
