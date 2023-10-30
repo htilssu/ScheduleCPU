@@ -16,7 +16,7 @@ namespace ScheduleCPU
 
     public class Table
     {
-        public List<TableItem> TableItems { get; set; }
+        public List<TableItem> TableItems { get; set; } = new List<TableItem>();
 
 
         public void AddItem(TableItem tableItem)

@@ -16,7 +16,8 @@ namespace ScheduleCPU
 
     public class SolveProblem
     {
-        public static void Solve(Algo type, int[] arrivalTime, int[] burstTime, int[] priority, int quantumTime = 0)
+        public static void Solve(Algo type, int[] arrivalTime, int[] burstTime, int[] priority = null,
+            int quantumTime = 0)
         {
             var processes = InitProcesses(arrivalTime, burstTime, priority);
             if (type == Algo.FCFS)
@@ -46,7 +47,7 @@ namespace ScheduleCPU
         {
             var tableResult = new Table();
             var ganttChart = new GanttChart();
-            var processesClone = processes.OrderByDescending(process => process.ArrivalTime).ToArray();
+            var processesClone = processes.OrderBy(process => process.ArrivalTime).ToArray();
 
             ganttChart.AddItem(new GanttItem()
             {
@@ -59,36 +60,41 @@ namespace ScheduleCPU
 
             for (var i = 1; i < processesClone.Length; i++)
             {
-
                 if (currentTime == 0 || currentTime >= processes[i].ArrivalTime)
                 {
+                    currentTime = ganttChart.GanttItems[i - 1].Exit + processesClone[i].BurstTime;
                     ganttChart.AddItem(new GanttItem()
                     {
                         Start = ganttChart.GanttItems[i - 1].Exit,
-                        Exit = ganttChart.GanttItems[i - 1].Exit + processesClone[i].BurstTime,
+                        Exit = currentTime,
                         Process = processesClone[i]
                     });
+                    
                 }
                 else
                 {
+                    currentTime = processes[i].ArrivalTime + processesClone[i].BurstTime;
+
                     ganttChart.AddItem(new GanttItem()
                     {
                         Start = processes[i].ArrivalTime,
-                        Exit = processes[i].ArrivalTime + processesClone[i].BurstTime,
+                        Exit = currentTime,
                         Process = processesClone[i]
                     });
                 }
             }
-            
-            for (var i = 0; i < ganttChart.GanttItems.Count; i++)
+
+            foreach (var gantt in ganttChart.GanttItems)
             {
-                var gantt = ganttChart.GanttItems[i];
                 tableResult.AddItem(new TableItem()
                 {
                     ProcessName = gantt.Process.ProcessName,
                     ArrivalTime = gantt.Process.ArrivalTime,
                     BurstTime = gantt.Process.BurstTime,
-                    Priority = gantt.Process.Priority
+                    Priority = gantt.Process.Priority,
+                    TurnAroundTime = gantt.Exit - gantt.Process.ArrivalTime,
+                    WaitingTime = gantt.Start - gantt.Process.ArrivalTime,
+                    ResponseTime = gantt.Start - gantt.Process.ArrivalTime,
                 });
             }
         }

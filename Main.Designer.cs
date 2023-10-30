@@ -74,6 +74,7 @@
             this.solveBtn.TabIndex = 3;
             this.solveBtn.Text = "Tính";
             this.solveBtn.UseVisualStyleBackColor = true;
+            this.solveBtn.Click += new System.EventHandler(this.solveBtn_Click);
             // 
             // arrivalTimeLb
             // 

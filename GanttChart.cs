@@ -4,7 +4,7 @@ namespace ScheduleCPU
 {
     public class GanttChart
     {
-        public List<GanttItem> GanttItems { get; set; }
+        public List<GanttItem> GanttItems { get; set; } = new List<GanttItem>();
 
         public void AddItem(GanttItem ganttItem)
         {

@@ -30,6 +30,14 @@ namespace ScheduleCPU
                 comboBox.Items.Add(value);
             }
         }
-        
+
+        private void solveBtn_Click(object sender, EventArgs e)
+        {
+            var arrivalTime = arrivalTimeTb.Text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var arrivalTimeInt = Array.ConvertAll(arrivalTime, int.Parse);
+            var burstTime = burstTimeTb.Text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var burstTimeInt = Array.ConvertAll(burstTime, int.Parse);
+            SolveProblem.Solve(Algo.FCFS, arrivalTimeInt, burstTimeInt);
+        }
     }
 }
