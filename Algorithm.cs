@@ -203,7 +203,7 @@ namespace ScheduleCPU
             ganttChart.AddItem(new GanttItem()
             {
                 Start = processesClone[0].ArrivalTime,
-                Exit = processesClone[0].BurstTime,
+                Exit = processesClone[0].ArrivalTime + processesClone[0].BurstTime,
                 ProcessName = processesClone[0].ProcessName
             });
 

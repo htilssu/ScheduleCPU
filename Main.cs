@@ -79,7 +79,7 @@ namespace ScheduleCPU
 
             tableResult.Rows.Clear();
             tableResult.Columns.Clear();
-            
+            pnlGantt.Controls.Clear();
             
         }
 
