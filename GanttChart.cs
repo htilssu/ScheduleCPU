@@ -16,6 +16,6 @@ namespace ScheduleCPU
     {
         public int Start { get; set; }
         public int Exit { get; set; }
-        public Process Process { get; set; }
+        public string ProcessName { get; set; }
     }
 }

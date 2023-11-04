@@ -7,10 +7,10 @@ namespace ScheduleCPU
         public string ProcessName { get; set; }
         public int ArrivalTime { get; set; }
         public int BurstTime { get; set; }
+        public int Priority { get; set; } = 0;
         public int TurnAroundTime { get; set; }
         public int ResponseTime { get; set; }
         public int WaitingTime { get; set; }
-        public int? Priority { get; set; }
     }
 
     public class Table
