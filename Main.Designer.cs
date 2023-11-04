@@ -36,6 +36,7 @@
             this.ProcessName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ArrivalTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.BurstTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.pnlGantt = new System.Windows.Forms.FlowLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this.tableResult)).BeginInit();
             this.SuspendLayout();
             // 
@@ -94,11 +95,19 @@
             this.BurstTime.HeaderText = "BurstTime";
             this.BurstTime.Name = "BurstTime";
             // 
+            // pnlGantt
+            // 
+            this.pnlGantt.Location = new System.Drawing.Point(14, 88);
+            this.pnlGantt.Name = "pnlGantt";
+            this.pnlGantt.Size = new System.Drawing.Size(1050, 245);
+            this.pnlGantt.TabIndex = 6;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1076, 754);
+            this.Controls.Add(this.pnlGantt);
             this.Controls.Add(this.tableResult);
             this.Controls.Add(this.solveBtn);
             this.Controls.Add(this.AlgoCoB);
@@ -108,6 +117,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.tableResult)).EndInit();
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.FlowLayoutPanel pnlGantt;
 
         private System.Windows.Forms.DataGridViewTextBoxColumn ProcessName;
         private System.Windows.Forms.DataGridViewTextBoxColumn ArrivalTime;

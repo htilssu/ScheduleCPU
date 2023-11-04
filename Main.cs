@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Microsoft.Win32;
 
 namespace ScheduleCPU
 {
@@ -36,8 +35,12 @@ namespace ScheduleCPU
             var algoSelected = (Algo)AlgoCoB.SelectedItem;
             var result = SolveProblem.Solve(algoSelected, arrivalTime, burstTime);
             WipeData();
-            
-            tableResult.DataSource = result.Table.TableItems;
+
+            var bindingSource = new BindingSource();
+            bindingSource.DataSource = result.Table.TableItems;
+            tableResult.DataSource = bindingSource;
+            InitGanttChart(result.GanttChart);
+           
         }
 
         private int[] ReadArrivalTime()
@@ -73,16 +76,19 @@ namespace ScheduleCPU
         private void WipeData()
         {
             tableResult.DataSource = null;
-            foreach (DataGridViewRow tableResultRow in tableResult.Rows)
-            {
-                tableResult.Rows.Remove(tableResultRow);
-            }
-            foreach (DataGridViewColumn tableResultColumn in tableResult.Columns)
-            {
-                tableResult.Columns.Remove(tableResultColumn);
-            }
 
-           
+            tableResult.Rows.Clear();
+            tableResult.Columns.Clear();
+            
+            
+        }
+
+        private void InitGanttChart(GanttChart ganttChart)
+        {
+            foreach (var item in ganttChart.GanttItems)
+            {
+                pnlGantt.Controls.Add(new UserControls.GanttItem(item.ProcessName,item.Start.ToString(),item.Exit.ToString()));
+            }
         }
         
     }
