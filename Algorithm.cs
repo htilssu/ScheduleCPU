@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms.VisualStyles;
 
 namespace ScheduleCPU
 {
@@ -25,6 +26,7 @@ namespace ScheduleCPU
                 case Algo.FCFS:
                     return FCFS(processes);
                 case Algo.SJF:
+                    return SJF(processes);
                 case Algo.SRTF:
                     return SRTF(processes);
                 case Algo.PP:
@@ -251,6 +253,91 @@ namespace ScheduleCPU
             }
 
             return new Result(ganttChart, tableResult);
+        }
+
+        private static Result SJF(Process[] processes)
+        {
+            var processesClone = (Process[])processes.Clone();
+            var ganttChart = new GanttChart();
+            var resultTable = new Table();
+            var processQueue = new Queue<Process>();
+            var index = 0;
+            var currentTime = 0;
+
+            processesClone = processesClone.OrderBy(p => p.ArrivalTime).ToArray();
+            processQueue.Enqueue(processesClone[index]);
+            while (index < processesClone.Length - 1 &&
+                   processesClone[index].ArrivalTime == processesClone[index + 1].ArrivalTime)
+            {
+                ++index;
+                processQueue.Enqueue(processesClone[index]);
+            }
+
+            if (processQueue.Count > 1)
+            {
+                processQueue = new Queue<Process>(processQueue.OrderBy(p => p.BurstTime));
+            }
+
+            while (processQueue.Count != 0)
+            {
+                var currentProcess = processQueue.Dequeue();
+
+                if (currentTime < currentProcess.ArrivalTime)
+                {
+                    currentTime = currentProcess.ArrivalTime;
+                }
+
+                ganttChart.AddItem(new GanttItem()
+                {
+                    Start = currentTime,
+                    Exit = currentTime + currentProcess.BurstTime,
+                    ProcessName = currentProcess.ProcessName
+                });
+
+                currentTime += currentProcess.BurstTime;
+
+                if (processQueue.Count == 0 && index == processesClone.Length - 1)
+                {
+                    break;
+                }
+
+                if (index < processesClone.Length - 1)
+                {
+                    while (processQueue.Count == 0 || processesClone[index].ArrivalTime <= currentTime)
+                    {
+                        processQueue.Enqueue(processesClone[index]);
+                        ++index;
+                        if (index == processesClone.Length - 1)
+                        {
+                            break;
+                        }
+                    }
+
+                    processQueue = new Queue<Process>(processQueue.OrderBy(p => p.BurstTime));
+                }
+            }
+
+            foreach (var ganttChartGanttItem in ganttChart.GanttItems)
+            {
+                var process = processes.FirstOrDefault(p => p.ProcessName == ganttChartGanttItem.ProcessName);
+                if (process != null)
+                {
+                    var tableItem = new TableItem
+                    {
+                        ProcessName = ganttChartGanttItem.ProcessName,
+                        ArrivalTime = ganttChartGanttItem.Start,
+                        WaitingTime = ganttChartGanttItem.Start - process.ArrivalTime,
+                        TurnAroundTime = ganttChartGanttItem.Exit - process.ArrivalTime,
+                        ResponseTime = ganttChartGanttItem.Start - process.ArrivalTime,
+                        Priority = process.Priority,
+                        BurstTime = process.BurstTime
+                    };
+                    resultTable.AddItem(tableItem);
+                }
+            }
+
+
+            return new Result(ganttChart, resultTable);
         }
     }
 }
