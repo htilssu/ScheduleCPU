@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms.VisualStyles;
 
 namespace ScheduleCPU
@@ -30,13 +31,16 @@ namespace ScheduleCPU
                 case Algo.SRTF:
                     return SRTF(processes);
                 case Algo.PP:
+                    return PP(processes);
                 case Algo.NPP:
+                    return NPP(processes);
                 case Algo.RR:
 
                 default:
                     return null;
             }
         }
+
 
         private static Result SRTF(Process[] processes)
         {
@@ -317,27 +321,165 @@ namespace ScheduleCPU
                 }
             }
 
-            foreach (var ganttChartGanttItem in ganttChart.GanttItems)
+            foreach (var tableItem in from ganttChartGanttItem in ganttChart.GanttItems
+                     let process = processes.FirstOrDefault(p => p.ProcessName == ganttChartGanttItem.ProcessName)
+                     where process != null
+                     select new TableItem
+                     {
+                         ProcessName = ganttChartGanttItem.ProcessName,
+                         ArrivalTime = ganttChartGanttItem.Start,
+                         WaitingTime = ganttChartGanttItem.Start - process.ArrivalTime,
+                         TurnAroundTime = ganttChartGanttItem.Exit - process.ArrivalTime,
+                         ResponseTime = ganttChartGanttItem.Start - process.ArrivalTime,
+                         Priority = process.Priority,
+                         BurstTime = process.BurstTime
+                     })
             {
-                var process = processes.FirstOrDefault(p => p.ProcessName == ganttChartGanttItem.ProcessName);
-                if (process != null)
-                {
-                    var tableItem = new TableItem
-                    {
-                        ProcessName = ganttChartGanttItem.ProcessName,
-                        ArrivalTime = ganttChartGanttItem.Start,
-                        WaitingTime = ganttChartGanttItem.Start - process.ArrivalTime,
-                        TurnAroundTime = ganttChartGanttItem.Exit - process.ArrivalTime,
-                        ResponseTime = ganttChartGanttItem.Start - process.ArrivalTime,
-                        Priority = process.Priority,
-                        BurstTime = process.BurstTime
-                    };
-                    resultTable.AddItem(tableItem);
-                }
+                resultTable.AddItem(tableItem);
             }
 
 
             return new Result(ganttChart, resultTable);
+        }
+
+        private static Result NPP(Process[] processes)
+        {
+            var tableResult = new Table();
+            var ganttChart = new GanttChart();
+            var processesClone = (Process[])processes.Clone();
+
+
+            return new Result(ganttChart, tableResult);
+        }
+
+        private static Result PP(Process[] processes)
+        {
+            var tableResult = new Table();
+            var ganttChart = new GanttChart();
+            var processesClone = (Process[])processes.Clone();
+            var processQueue = new Queue<Process>();
+            processesClone = processesClone.OrderBy(p => p.ArrivalTime).ToArray();
+
+            var index = 0;
+            var currentTime = 0;
+
+            processQueue.Enqueue(processesClone[index]);
+            while (index < processesClone.Length - 1 &&
+                   processesClone[index].ArrivalTime == processesClone[index + 1].ArrivalTime)
+            {
+                ++index;
+                processQueue.Enqueue(processesClone[index]);
+            }
+
+            processQueue = new Queue<Process>(processQueue.OrderBy(p => p.Priority));
+
+            while (processQueue.Count != 0)
+            {
+                var currentProcess = processQueue.Dequeue();
+                if (currentTime < currentProcess.ArrivalTime)
+                {
+                    currentTime = currentProcess.ArrivalTime;
+                }
+
+                if (index < processesClone.Length - 1)
+                {
+                    var pseudoExitTime = currentTime + currentProcess.BurstTime;
+                    var nextProcess = processesClone[index + 1];
+                    if (pseudoExitTime > nextProcess.ArrivalTime && currentProcess.Priority > nextProcess.Priority)
+                    {
+                        ganttChart.AddItem(new GanttItem()
+                        {
+                            Start = currentTime,
+                            Exit = currentTime + nextProcess.ArrivalTime,
+                            ProcessName = currentProcess.ProcessName
+                        });
+                        currentTime = nextProcess.ArrivalTime;
+                        processQueue.Enqueue(nextProcess);
+                        currentProcess.BurstTime = pseudoExitTime - currentTime;
+                        processQueue.Enqueue(currentProcess);
+                    }
+                    else
+                    {
+                        ganttChart.AddItem(new GanttItem()
+                        {
+                            Start = currentTime,
+                            Exit = currentTime + currentProcess.BurstTime,
+                            ProcessName = currentProcess.ProcessName
+                        });
+                        currentTime = currentProcess.BurstTime;
+                    }
+                }
+                else
+                {
+                    ganttChart.AddItem(new GanttItem()
+                    {
+                        Start = currentTime,
+                        Exit = currentTime + currentProcess.BurstTime,
+                        ProcessName = currentProcess.ProcessName
+                    });
+                    currentTime = currentProcess.BurstTime;
+                }
+
+                if (index == processesClone.Length - 1 && processQueue.Count == 0)
+                {
+                    break;
+                }
+
+                if (index < processesClone.Length - 1)
+                {
+                    if (processQueue.Count == 0)
+                    {
+                        ++index;
+                        processQueue.Enqueue(processesClone[index]);
+                        while (index < processesClone.Length - 1 &&
+                               processesClone[index].ArrivalTime == processesClone[index + 1].ArrivalTime)
+                        {
+                            ++index;
+                            processQueue.Enqueue(processesClone[index]);
+                        }
+                    }
+
+                    while (index < processesClone.Length - 1 && processesClone[index + 1].ArrivalTime <= currentTime)
+                    {
+                        ++index;
+                        processQueue.Enqueue(processesClone[index]);
+                    }
+                }
+
+                processQueue = new Queue<Process>(processQueue.OrderBy(p => p.Priority));
+            }
+
+            foreach (var process in processesClone)
+            {
+                var realProcess = processes.First(p => p.ProcessName == process.ProcessName);
+                var tableItem = new TableItem()
+                {
+                    ArrivalTime = process.ArrivalTime,
+                    ProcessName = process.ProcessName,
+                    BurstTime = realProcess.BurstTime,
+                    Priority = process.Priority
+                };
+                var ExitTime = 0;
+                for (var i = ganttChart.GanttItems.Count - 1; i >= 0; i--)
+                {
+                    if (ganttChart.GanttItems[i].ProcessName != process.ProcessName) continue;
+                    ExitTime = ganttChart.GanttItems[i].Exit;
+                    break;
+                }
+
+                var FirstCome =
+                    (from ganttChartGanttItem in ganttChart.GanttItems
+                        where ganttChartGanttItem.ProcessName == process.ProcessName
+                        select ganttChartGanttItem.Start).FirstOrDefault();
+
+                tableItem.TurnAroundTime = ExitTime - process.ArrivalTime;
+                // TODO warning
+                tableItem.WaitingTime = tableItem.TurnAroundTime - FirstCome;
+                tableItem.ResponseTime = FirstCome - process.ArrivalTime;
+            }
+
+
+            return new Result(ganttChart, tableResult);
         }
     }
 }

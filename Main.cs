@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
@@ -33,10 +34,10 @@ namespace ScheduleCPU
             var burstTime = ReadBurstTime();
             var priority = ReadPriority();
 
-
+            int.TryParse(tbQuantumTime.Text, out var quantumTime);
             var algoSelected = (Algo)AlgoCoB.SelectedItem;
             var result = SolveProblem.Solve(algoSelected, arrivalTime, burstTime, priority,
-                int.Parse(tbQuantumTime.Text));
+                quantumTime);
             WipeData();
 
             var bindingSource = new BindingSource();
@@ -47,47 +48,32 @@ namespace ScheduleCPU
 
         private int[] ReadArrivalTime()
         {
-            var arrivalTime = new List<int>();
-            foreach (DataGridViewRow tableResultRow in tableResult.Rows)
-            {
-                var value = tableResultRow.Cells[1].Value?.ToString();
-                if (value != null)
-                {
-                    arrivalTime.Add(int.Parse(value));
-                }
-            }
-
-            return arrivalTime.ToArray();
+            return (from DataGridViewRow tableResultRow
+                    in tableResult.Rows
+                select tableResultRow.Cells[1].Value?.ToString()
+                into value
+                where value != null
+                select int.Parse(value)).ToArray();
         }
 
         private int[] ReadBurstTime()
         {
-            var burstTime = new List<int>();
-            foreach (DataGridViewRow tableResultRow in tableResult.Rows)
-            {
-                var value = tableResultRow.Cells[2].Value?.ToString();
-                if (value != null)
-                {
-                    burstTime.Add(int.Parse(value));
-                }
-            }
-
-            return burstTime.ToArray();
+            return (from DataGridViewRow tableResultRow
+                    in tableResult.Rows
+                select tableResultRow.Cells[2].Value?.ToString()
+                into value
+                where value != null
+                select int.Parse(value)).ToArray();
         }
 
         private int[] ReadPriority()
         {
-            var priority = new List<int>();
-            foreach (DataGridViewRow row in tableResult.Rows)
-            {
-                var value = row.Cells[3].Value?.ToString();
-                if (value != null)
-                {
-                    priority.Add(int.Parse(value));
-                }
-            }
-
-            return priority.ToArray();
+            return (from DataGridViewRow row
+                    in tableResult.Rows
+                select row.Cells[3].Value?.ToString()
+                into value
+                where value != null
+                select int.Parse(value)).ToArray();
         }
 
         private void WipeData()
