@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace ScheduleCPU
@@ -30,17 +31,18 @@ namespace ScheduleCPU
         {
             var arrivalTime = ReadArrivalTime();
             var burstTime = ReadBurstTime();
+            var priority = ReadPriority();
 
 
             var algoSelected = (Algo)AlgoCoB.SelectedItem;
-            var result = SolveProblem.Solve(algoSelected, arrivalTime, burstTime);
+            var result = SolveProblem.Solve(algoSelected, arrivalTime, burstTime, priority,
+                int.Parse(tbQuantumTime.Text));
             WipeData();
 
             var bindingSource = new BindingSource();
             bindingSource.DataSource = result.Table.TableItems;
             tableResult.DataSource = bindingSource;
             InitGanttChart(result.GanttChart);
-           
         }
 
         private int[] ReadArrivalTime()
@@ -73,6 +75,21 @@ namespace ScheduleCPU
             return burstTime.ToArray();
         }
 
+        private int[] ReadPriority()
+        {
+            var priority = new List<int>();
+            foreach (DataGridViewRow row in tableResult.Rows)
+            {
+                var value = row.Cells[3].Value?.ToString();
+                if (value != null)
+                {
+                    priority.Add(int.Parse(value));
+                }
+            }
+
+            return priority.ToArray();
+        }
+
         private void WipeData()
         {
             tableResult.DataSource = null;
@@ -80,16 +97,39 @@ namespace ScheduleCPU
             tableResult.Rows.Clear();
             tableResult.Columns.Clear();
             pnlGantt.Controls.Clear();
-            
         }
 
         private void InitGanttChart(GanttChart ganttChart)
         {
             foreach (var item in ganttChart.GanttItems)
             {
-                pnlGantt.Controls.Add(new UserControls.GanttItem(item.ProcessName,item.Start.ToString(),item.Exit.ToString()));
+                pnlGantt.Controls.Add(new UserControls.GanttItem(item.ProcessName, item.Start.ToString(),
+                    item.Exit.ToString()));
             }
         }
-        
+
+
+        private void HideQuantumTb()
+        {
+            tbQuantumTime.Visible = false;
+        }
+
+        private void ShowQuantumTb()
+        {
+            tbQuantumTime.Visible = true;
+        }
+
+        private void ChangeAlgoSelection(object sender, EventArgs e)
+        {
+            var comboBox = (ComboBox)sender;
+            if ((Algo)comboBox.SelectedItem == Algo.RR)
+            {
+                ShowQuantumTb();
+            }
+            else
+            {
+                HideQuantumTb();
+            }
+        }
     }
 }

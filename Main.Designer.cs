@@ -37,6 +37,8 @@
             this.ArrivalTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.BurstTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pnlGantt = new System.Windows.Forms.FlowLayoutPanel();
+            this.tbQuantumTime = new System.Windows.Forms.TextBox();
+            this.Priority = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.tableResult)).BeginInit();
             this.SuspendLayout();
             // 
@@ -48,6 +50,7 @@
             this.AlgoCoB.Name = "AlgoCoB";
             this.AlgoCoB.Size = new System.Drawing.Size(316, 24);
             this.AlgoCoB.TabIndex = 0;
+            this.AlgoCoB.SelectedIndexChanged += new System.EventHandler(this.ChangeAlgoSelection);
             // 
             // solveBtn
             // 
@@ -65,7 +68,7 @@
             this.tableResult.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.tableResult.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.tableResult.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.tableResult.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.ProcessName, this.ArrivalTime, this.BurstTime });
+            this.tableResult.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.ProcessName, this.ArrivalTime, this.BurstTime, this.Priority });
             this.tableResult.Location = new System.Drawing.Point(12, 352);
             this.tableResult.Name = "tableResult";
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
@@ -102,11 +105,27 @@
             this.pnlGantt.Size = new System.Drawing.Size(1050, 245);
             this.pnlGantt.TabIndex = 6;
             // 
+            // tbQuantumTime
+            // 
+            this.tbQuantumTime.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tbQuantumTime.Location = new System.Drawing.Point(334, 12);
+            this.tbQuantumTime.Name = "tbQuantumTime";
+            this.tbQuantumTime.Size = new System.Drawing.Size(146, 22);
+            this.tbQuantumTime.TabIndex = 7;
+            this.tbQuantumTime.UseWaitCursor = true;
+            this.tbQuantumTime.Visible = false;
+            // 
+            // Priority
+            // 
+            this.Priority.HeaderText = "Priority";
+            this.Priority.Name = "Priority";
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1076, 754);
+            this.Controls.Add(this.tbQuantumTime);
             this.Controls.Add(this.pnlGantt);
             this.Controls.Add(this.tableResult);
             this.Controls.Add(this.solveBtn);
@@ -116,7 +135,12 @@
             this.Text = "Main";
             ((System.ComponentModel.ISupportInitialize)(this.tableResult)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
         }
+
+        private System.Windows.Forms.DataGridViewTextBoxColumn Priority;
+
+        private System.Windows.Forms.TextBox tbQuantumTime;
 
         private System.Windows.Forms.FlowLayoutPanel pnlGantt;
 
