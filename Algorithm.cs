@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Windows.Forms.VisualStyles;
-
 namespace ScheduleCPU
 {
     public enum Algo
@@ -35,7 +32,7 @@ namespace ScheduleCPU
                 case Algo.NPP:
                     return NPP(processes);
                 case Algo.RR:
-
+                    return RR(processes, quantumTime);
                 default:
                     return null;
             }
@@ -46,15 +43,15 @@ namespace ScheduleCPU
         {
             var tableResult = new Table();
             var ganttChart = new GanttChart();
-            var processesClone = processes.OrderBy(process => process.ArrivalTime).ToArray();
+             processes = processes.OrderBy(process => process.ArrivalTime).ToArray();
             var processesQueue = new List<Process>();
             var index = 0;
             var currentTime = 0;
 
-            processesQueue.Add(processesClone[0]);
+            processesQueue.Add(processes[0]);
 
 
-            while (index < processesClone.Length && processesQueue.Count != 0)
+            while (index < processes.Length && processesQueue.Count != 0)
             {
                 var currentProcess = processesQueue[0];
                 processesQueue.Remove(currentProcess);
@@ -79,8 +76,13 @@ namespace ScheduleCPU
                         ProcessName = currentProcess.ProcessName
                     });
                     currentTime = processesQueue[0].ArrivalTime;
-                    currentProcess.BurstTime = pseudoExitTime - processesQueue[0].ArrivalTime;
-                    AddProcessToQueue(currentProcess);
+                    var newProcess = new Process()
+                    {
+                        ProcessName = currentProcess.ProcessName,
+                        ArrivalTime = currentProcess.ArrivalTime,
+                        BurstTime = pseudoExitTime - processesQueue[0].ArrivalTime
+                    };
+                    AddProcessToQueue(newProcess);
                 }
                 else
                 {
@@ -95,9 +97,9 @@ namespace ScheduleCPU
 
                 if (processesQueue.Count != 0) continue;
 
-                if (index < processesClone.Length - 1)
+                if (index < processes.Length - 1)
                 {
-                    processesQueue.Add(processesClone[index + 1]);
+                    processesQueue.Add(processes[index + 1]);
                     ++index;
                 }
             }
@@ -130,7 +132,6 @@ namespace ScheduleCPU
                 tableResult.AddItem(tableItem);
             }
 
-            Console.WriteLine();
             return new Result(ganttChart, tableResult);
 
             void AddProcessToQueue(Process process)
@@ -143,11 +144,11 @@ namespace ScheduleCPU
 
             void AddToQueue(int time)
             {
-                for (var i = index + 1; i < processesClone.Length; i++)
+                for (var i = index + 1; i < processes.Length; i++)
                 {
-                    if (processesClone[i].ArrivalTime <= time)
+                    if (processes[i].ArrivalTime <= time)
                     {
-                        processesQueue.Add(processesClone[i]);
+                        processesQueue.Add(processes[i]);
                         ++index;
                         continue;
                     }
@@ -213,11 +214,11 @@ namespace ScheduleCPU
                 ProcessName = processesClone[0].ProcessName
             });
 
-            var currentTime = processesClone[0].BurstTime;
+            var currentTime = processesClone[0].ArrivalTime + processesClone[0].BurstTime;
 
             for (var i = 1; i < processesClone.Length; i++)
             {
-                if (currentTime != 0 || currentTime >= processes[i].ArrivalTime)
+                if (currentTime != 0 && currentTime >= processes[i].ArrivalTime)
                 {
                     currentTime = ganttChart.GanttItems[i - 1].Exit + processesClone[i].BurstTime;
                     ganttChart.AddItem(new GanttItem()
@@ -273,8 +274,7 @@ namespace ScheduleCPU
             while (index < processesClone.Length - 1 &&
                    processesClone[index].ArrivalTime == processesClone[index + 1].ArrivalTime)
             {
-                ++index;
-                processQueue.Enqueue(processesClone[index]);
+                processQueue.Enqueue(processesClone[++index]);
             }
 
             if (processQueue.Count > 1)
@@ -307,10 +307,9 @@ namespace ScheduleCPU
 
                 if (index < processesClone.Length - 1)
                 {
-                    while (processQueue.Count == 0 || processesClone[index].ArrivalTime <= currentTime)
+                    while (processQueue.Count == 0 || processesClone[index + 1].ArrivalTime <= currentTime)
                     {
-                        processQueue.Enqueue(processesClone[index]);
-                        ++index;
+                        processQueue.Enqueue(processesClone[++index]);
                         if (index == processesClone.Length - 1)
                         {
                             break;
@@ -327,7 +326,7 @@ namespace ScheduleCPU
                      select new TableItem
                      {
                          ProcessName = ganttChartGanttItem.ProcessName,
-                         ArrivalTime = ganttChartGanttItem.Start,
+                         ArrivalTime = process.ArrivalTime,
                          WaitingTime = ganttChartGanttItem.Start - process.ArrivalTime,
                          TurnAroundTime = ganttChartGanttItem.Exit - process.ArrivalTime,
                          ResponseTime = ganttChartGanttItem.Start - process.ArrivalTime,
@@ -347,7 +346,74 @@ namespace ScheduleCPU
             var tableResult = new Table();
             var ganttChart = new GanttChart();
             var processesClone = (Process[])processes.Clone();
+            processesClone = processesClone.OrderBy(p => p.ArrivalTime).ThenBy(p => p.Priority).ToArray();
+            var index = 0;
+            var currentTime = 0;
 
+            var processQueue = new Queue<Process>();
+            processQueue.Enqueue(processesClone[index]);
+
+            if (index < processesClone.Length - 1 &&
+                processesClone[index + 1].ArrivalTime == processesClone[index].ArrivalTime)
+            {
+                processQueue.Enqueue(processesClone[++index]);
+            }
+
+
+            while (processQueue.Count > 0)
+            {
+                var currentProcess = processQueue.Dequeue();
+                if (currentTime < currentProcess.ArrivalTime)
+                {
+                    currentTime = currentProcess.ArrivalTime;
+                }
+
+                ganttChart.AddItem(new GanttItem()
+                {
+                    Exit = currentTime + currentProcess.BurstTime,
+                    Start = currentTime,
+                    ProcessName = currentProcess.ProcessName
+                });
+
+                currentTime += currentProcess.BurstTime;
+
+                if (index == processesClone.Length - 1 && processQueue.Count == 0)
+                {
+                    break;
+                }
+
+                if (processQueue.Count == 0)
+                {
+                    processQueue.Enqueue(processesClone[++index]);
+                    while (index < processesClone.Length - 1 &&
+                           (processesClone[index + 1].ArrivalTime <= currentTime ||
+                            processesClone[index].ArrivalTime ==
+                            processesClone[index + 1].ArrivalTime))
+                    {
+                        processQueue.Enqueue(processesClone[++index]);
+                    }
+
+
+                    processQueue = new Queue<Process>(processQueue.OrderBy(p => p.Priority));
+                }
+            }
+
+            foreach (var tableItem in from ganttChartGanttItem in ganttChart.GanttItems
+                     let process = processes.FirstOrDefault(p => p.ProcessName == ganttChartGanttItem.ProcessName)
+                     where process != null
+                     select new TableItem
+                     {
+                         ProcessName = ganttChartGanttItem.ProcessName,
+                         ArrivalTime = ganttChartGanttItem.Start,
+                         WaitingTime = ganttChartGanttItem.Start - process.ArrivalTime,
+                         TurnAroundTime = ganttChartGanttItem.Exit - process.ArrivalTime,
+                         ResponseTime = ganttChartGanttItem.Start - process.ArrivalTime,
+                         Priority = process.Priority,
+                         BurstTime = process.BurstTime
+                     })
+            {
+                tableResult.AddItem(tableItem);
+            }
 
             return new Result(ganttChart, tableResult);
         }
@@ -356,19 +422,17 @@ namespace ScheduleCPU
         {
             var tableResult = new Table();
             var ganttChart = new GanttChart();
-            var processesClone = (Process[])processes.Clone();
             var processQueue = new Queue<Process>();
-            processesClone = processesClone.OrderBy(p => p.ArrivalTime).ToArray();
+            processes = processes.OrderBy(p => p.ArrivalTime).ThenBy(p => p.Priority).ToArray();
 
             var index = 0;
             var currentTime = 0;
 
-            processQueue.Enqueue(processesClone[index]);
-            while (index < processesClone.Length - 1 &&
-                   processesClone[index].ArrivalTime == processesClone[index + 1].ArrivalTime)
+            processQueue.Enqueue(processes[index]);
+            while (index < processes.Length - 1 &&
+                   processes[index].ArrivalTime == processes[index + 1].ArrivalTime)
             {
-                ++index;
-                processQueue.Enqueue(processesClone[index]);
+                processQueue.Enqueue(processes[++index]);
             }
 
             processQueue = new Queue<Process>(processQueue.OrderBy(p => p.Priority));
@@ -381,16 +445,16 @@ namespace ScheduleCPU
                     currentTime = currentProcess.ArrivalTime;
                 }
 
-                if (index < processesClone.Length - 1)
+                if (index < processes.Length - 1)
                 {
                     var pseudoExitTime = currentTime + currentProcess.BurstTime;
-                    var nextProcess = processesClone[index + 1];
+                    var nextProcess = processes[index + 1];
                     if (pseudoExitTime > nextProcess.ArrivalTime && currentProcess.Priority > nextProcess.Priority)
                     {
                         ganttChart.AddItem(new GanttItem()
                         {
                             Start = currentTime,
-                            Exit = currentTime + nextProcess.ArrivalTime,
+                            Exit = nextProcess.ArrivalTime,
                             ProcessName = currentProcess.ProcessName
                         });
                         currentTime = nextProcess.ArrivalTime;
@@ -406,7 +470,7 @@ namespace ScheduleCPU
                             Exit = currentTime + currentProcess.BurstTime,
                             ProcessName = currentProcess.ProcessName
                         });
-                        currentTime = currentProcess.BurstTime;
+                        currentTime += currentProcess.BurstTime;
                     }
                 }
                 else
@@ -417,39 +481,39 @@ namespace ScheduleCPU
                         Exit = currentTime + currentProcess.BurstTime,
                         ProcessName = currentProcess.ProcessName
                     });
-                    currentTime = currentProcess.BurstTime;
+                    currentTime += currentProcess.BurstTime;
                 }
 
-                if (index == processesClone.Length - 1 && processQueue.Count == 0)
+                if (index == processes.Length - 1 && processQueue.Count == 0)
                 {
                     break;
                 }
 
-                if (index < processesClone.Length - 1)
+                if (index < processes.Length - 1)
                 {
                     if (processQueue.Count == 0)
                     {
                         ++index;
-                        processQueue.Enqueue(processesClone[index]);
-                        while (index < processesClone.Length - 1 &&
-                               processesClone[index].ArrivalTime == processesClone[index + 1].ArrivalTime)
+                        processQueue.Enqueue(processes[index]);
+                        while (index < processes.Length - 1 &&
+                               processes[index].ArrivalTime == processes[index + 1].ArrivalTime)
                         {
                             ++index;
-                            processQueue.Enqueue(processesClone[index]);
+                            processQueue.Enqueue(processes[index]);
                         }
                     }
 
-                    while (index < processesClone.Length - 1 && processesClone[index + 1].ArrivalTime <= currentTime)
+                    while (index < processes.Length - 1 && processes[index + 1].ArrivalTime <= currentTime)
                     {
                         ++index;
-                        processQueue.Enqueue(processesClone[index]);
+                        processQueue.Enqueue(processes[index]);
                     }
                 }
 
                 processQueue = new Queue<Process>(processQueue.OrderBy(p => p.Priority));
             }
 
-            foreach (var process in processesClone)
+            foreach (var process in processes)
             {
                 var realProcess = processes.First(p => p.ProcessName == process.ProcessName);
                 var tableItem = new TableItem()
@@ -474,8 +538,94 @@ namespace ScheduleCPU
 
                 tableItem.TurnAroundTime = ExitTime - process.ArrivalTime;
                 // TODO warning
-                tableItem.WaitingTime = tableItem.TurnAroundTime - FirstCome;
+                tableItem.WaitingTime = tableItem.TurnAroundTime - process.BurstTime;
                 tableItem.ResponseTime = FirstCome - process.ArrivalTime;
+
+                tableResult.AddItem(tableItem);
+            }
+
+
+            return new Result(ganttChart, tableResult);
+        }
+
+        private static Result RR(Process[] processes, int quantumTime)
+        {
+            var tableResult = new Table();
+            var ganttChart = new GanttChart();
+            processes = processes.OrderBy(p => p.ArrivalTime).ToArray();
+            var processQueue = new Queue<Process>(processes);
+
+            var currentTime = 0;
+
+            while (processQueue.Count > 0)
+            {
+                var currentProcess = processQueue.Dequeue();
+                if (currentTime < currentProcess.ArrivalTime)
+                {
+                    currentTime = currentProcess.ArrivalTime;
+                }
+
+                var pseudoExitTime = currentTime + currentProcess.BurstTime;
+                var isOutOfTime = !(currentTime + quantumTime >= pseudoExitTime);
+
+                if (!isOutOfTime)
+                {
+                    ganttChart.AddItem(new GanttItem()
+                    {
+                        Start = currentTime,
+                        Exit = pseudoExitTime,
+                        ProcessName = currentProcess.ProcessName
+                    });
+                    currentTime += pseudoExitTime;
+                }
+                else
+                {
+                    ganttChart.AddItem(new GanttItem()
+                    {
+                        Start = currentTime,
+                        Exit = currentTime + quantumTime,
+                        ProcessName = currentProcess.ProcessName
+                    });
+
+                    currentTime += quantumTime;
+                    var newProcess = new Process()
+                    {
+                        ProcessName = currentProcess.ProcessName,
+                        ArrivalTime = currentProcess.ArrivalTime,
+                        BurstTime = currentProcess.BurstTime - quantumTime
+                    };
+                   
+                    processQueue.Enqueue(newProcess);
+                }
+            }
+
+            foreach (var process in processes)
+            {
+                var tableItem = new TableItem()
+                {
+                    ProcessName = process.ProcessName,
+                    ArrivalTime = process.ArrivalTime,
+                    BurstTime = process.BurstTime,
+                    Priority = process.Priority,
+                };
+                var exitTime = 0;
+                for (var i = ganttChart.GanttItems.Count - 1; i >= 0; i--)
+                {
+                    var ganttChartGanttItem = ganttChart.GanttItems[i];
+                    if (ganttChartGanttItem.ProcessName != process.ProcessName) continue;
+                    exitTime = ganttChartGanttItem.Exit;
+                    break;
+                }
+
+                var firstCome =
+                    (from ganttChartGanttItem in ganttChart.GanttItems
+                        where ganttChartGanttItem.ProcessName == process.ProcessName
+                        select ganttChartGanttItem.Start).FirstOrDefault();
+                tableItem.TurnAroundTime = exitTime - process.ArrivalTime;
+                tableItem.WaitingTime = tableItem.TurnAroundTime - tableItem.BurstTime;
+                tableItem.ResponseTime = firstCome - tableItem.ArrivalTime;
+                
+                tableResult.AddItem(tableItem);
             }
 
 

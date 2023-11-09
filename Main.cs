@@ -68,12 +68,15 @@ namespace ScheduleCPU
 
         private int[] ReadPriority()
         {
-            return (from DataGridViewRow row
-                    in tableResult.Rows
-                select row.Cells[3].Value?.ToString()
-                into value
-                where value != null
-                select int.Parse(value)).ToArray();
+            List<int> list = new List<int>();
+            foreach (DataGridViewRow row in tableResult.Rows)
+            {
+                var value = row.Cells[3].Value?.ToString();
+                list.Add(value != null ? int.Parse(value) : 0);
+            }
+
+            list.RemoveAt(list.Count - 1);
+            return list.ToArray();
         }
 
         private void WipeData()
